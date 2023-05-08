@@ -10,18 +10,19 @@ interface SchemaOption {
 }
 interface Schema {
     label: string;
-    options?: SchemaOption[]
+    options?: SchemaOption | SchemaOption[]
 }
-interface Fields {
+
+interface PropInner {
+    category: string;
+    color: string;
     component: string;
     schema: Schema
 }
-type Properties = {
-    name: string;
-    category: string;
-    color: string;
-    fields: Fields
-};
+interface Properties {
+    [name: string]: PropInner;
+}
+
 type Wires = string[][]
 interface ChildWires {
     in: string[][]
@@ -47,18 +48,7 @@ class Symbol {
     id = "";
     name = "";
     type = "";
-    properties: Properties = {
-        name: "",
-        category: "",
-        color: "",
-        fields: {
-            component: "",
-            schema: {
-                label: "",
-                options:[]
-            }
-        }
-    };
+    properties: Properties = {};
     children: Children = {
         wires: {
             in: [[]],
