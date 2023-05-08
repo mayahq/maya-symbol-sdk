@@ -1,9 +1,16 @@
 
 import { OnMessageCallback } from "../deps.ts";
 type GenericObject = Record<string, unknown>;
-type Children = Symbol[];
 type Properties = GenericObject;
 type Wires = string[][]
+interface ChildWires {
+    in: string[][]
+    out: string[][]
+}
+interface Children {
+    wires: ChildWires,
+    symbol: Symbol[]
+};
 type Position = {
     x: number
     y: number
@@ -21,7 +28,13 @@ class Symbol {
     name = "";
     type = "";
     properties: Properties = {};
-    children: Children = [];
+    children: Children = {
+        wires: {
+            in: [[]],
+            out: [[]]
+        },
+        symbol: []
+    };
     metadata: Metadata = {
         position: {
             x: 0,
@@ -41,7 +54,7 @@ class Symbol {
         this.runtime = runtime
     }
 
-    onInit(): void {
+    onInit(callback: OnMessageCallback): void {
 
     }
 
