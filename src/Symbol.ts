@@ -1,7 +1,6 @@
 
 import { OnMessageCallback } from "../deps.ts";
 import utils from "../utils/index.ts";
-type GenericObject = Record<string, unknown>;
 
 interface SchemaOption {
     title: string;
