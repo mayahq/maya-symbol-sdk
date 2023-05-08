@@ -1,6 +1,3 @@
-import fieldEval from './utils/fieldEval.ts'
-import utils from './utils/index.ts'
-
 // @deno-types="npm:@types/lodash@4.14.194"
 export interface OnMessageCallback { (done: unknown): void}
 
