@@ -10,7 +10,7 @@ interface ChildWires {
 }
 interface Children {
     wires: ChildWires,
-    symbol: Symbol[]
+    symbols: Symbol[]
 };
 type Position = {
     x: number
@@ -34,7 +34,7 @@ class Symbol {
             in: [[]],
             out: [[]]
         },
-        symbol: []
+        symbols: []
     };
     metadata: Metadata = {
         position: {
