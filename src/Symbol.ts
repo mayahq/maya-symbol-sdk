@@ -1,5 +1,6 @@
 
 import { OnMessageCallback } from "../deps.ts";
+import utils from "../utils/index.ts";
 type GenericObject = Record<string, unknown>;
 type Properties = GenericObject;
 type Wires = string[][]
@@ -49,6 +50,12 @@ class Symbol {
     description = "";
 
     runtime: unknown;
+    utils: Record<string, object> = {
+        exceptions:{
+            UnmatchedDataTypeException: utils.UnmatchedDataTypeException
+        },
+        fieldEval: utils.fieldEval
+    }
 
     constructor(runtime: unknown) {
         this.runtime = runtime
@@ -58,7 +65,7 @@ class Symbol {
 
     }
 
-    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>, vals: Record<string, unknown>): void {
+    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>): void {
 
     }
 }
