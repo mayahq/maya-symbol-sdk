@@ -1,5 +1,5 @@
 class UnmatchedDataTypeException implements Error {
-    name: string = "UnmatchedDataTypeException";
+    name = "UnmatchedDataTypeException";
     message: string;
     constructor(message: string) {
         this.message = message
