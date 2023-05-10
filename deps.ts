@@ -44,4 +44,5 @@ export type Metadata = {
 } | Record<string, never>
 
 export {default as lodash} from 'npm:lodash@4.17.21'
-export {default as utils} from "./utils/index.ts"
+export {default as evaluateSymbolProperties } from './utils/evaluateSymbolProperties.ts'
+export {default as exceptions} from './utils/exceptions.ts'
