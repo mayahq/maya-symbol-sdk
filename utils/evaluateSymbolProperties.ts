@@ -9,7 +9,7 @@ function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, u
             const type: PrimitiveTypes = propVal.type;
             switch (type) {
                 case "str": {
-                    evaluated[property] = propVal.value
+                    evaluated[property] = propVal.value 
                     break;
                 }
                 case "bool": {
@@ -19,7 +19,7 @@ function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, u
                         evaluated[property] = "false"
                     } else {
                         console.error(`Property ${property} is not set as correct boolean symbol`)
-                        throw new exceptions.UnmatchedDataTypeException("Not a boolean value")
+                        throw new exceptions.UnmatchedDataTypeException("Not a")
                     }
                     break;
                 }
