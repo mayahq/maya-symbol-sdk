@@ -7,4 +7,6 @@ class UnmatchedDataTypeException implements Error {
 }
 
 
-export default UnmatchedDataTypeException
+export default {
+    UnmatchedDataTypeException
+}
