@@ -1,10 +1,17 @@
+import TypedInput from './utils/typedInputs.ts';
 // @deno-types="npm:@types/lodash@4.14.194"
 export interface OnMessageCallback { (done: unknown): void}
+
+export type GenericArray<T=unknown> = Array<T>
+
+export type PrimitiveTypes = 'str' | 'num' | 'bool' | 'json' | 'date' | 'msg' | 'global' | 're' | 'jsonata' | 'password' | 'bin' | 'select' | 'checkbox' | 'radio' | 'config';
+
+export type ListPrimitiveTypes = Array<PrimitiveTypes>
 export interface SchemaOption {
     title: string;
     allowInput: boolean;
     placeholder?: string;
-    types?: string[];
+    types?: ListPrimitiveTypes
 }
 export interface Schema {
     label: string;
@@ -12,13 +19,12 @@ export interface Schema {
 }
 
 export interface PropInner {
-    category: string;
-    color: string;
-    component: string;
-    schema: Schema
+    value: string | number | boolean;
+    type: PrimitiveTypes;
+    metadata?: Record<string, unknown>;
 }
 export interface Properties {
-    [name: string]: PropInner;
+    [name: string]: PropInner | TypedInput;
 }
 
 export type Wires = string[][]
@@ -29,14 +35,13 @@ export interface ChildWires {
 export type Position = {
     x: number
     y: number
-    z: number
 }
-export interface Metadata {
+export type Metadata = {
     position: Position;
     step_id: string;
     tmp_id: string;
     prefix: string;
-}
+} | Record<string, never>
 
 export {default as lodash} from 'npm:lodash@4.17.21'
-export {default as mayautils} from "./utils/index.ts"
+export {default as utils} from "./utils/index.ts"

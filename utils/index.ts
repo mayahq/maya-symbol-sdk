@@ -1,9 +1,11 @@
-import fieldEval from "./fieldEval.ts";
 import UnmatchedDataTypeException from "./exceptions.ts";
+import TypedInput from "./typedInputs.ts";
+import evaluateSymbolProperty from "./evaluateSymbolProperties.ts";
 
 const utils = {
     UnmatchedDataTypeException,
-    fieldEval
+    TypedInput,
+    evaluateSymbolProperty
 }
 
 export default utils
