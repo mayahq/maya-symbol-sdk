@@ -1,5 +1,6 @@
 import Symbol from "../index.ts";
 import { PrimitiveTypes, lodash } from "../deps.ts";
+import exceptions from "./exceptions.ts";
 
 function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, unknown>): Record<string, unknown> {
     const evaluated: Record<string, unknown> = {}
@@ -18,7 +19,7 @@ function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, u
                         evaluated[property] = "false"
                     } else {
                         console.error(`Property ${property} is not set as correct boolean symbol`)
-                        throw new Error("Not a boolean value")
+                        throw new exceptions.UnmatchedDataTypeException("Not a boolean value")
                     }
                     break;
                 }
