@@ -1,4 +1,5 @@
-import TypedInput from './utils/typedInputs.ts';
+//@ts-ignore: not sure why there was a warning
+import TypedInput from './utils/typedInput.ts';
 // @deno-types="npm:@types/lodash@4.14.194"
 export interface OnMessageCallback { (done: unknown): void}
 
@@ -46,4 +47,4 @@ export type Metadata = {
 export {default as lodash} from 'npm:lodash@4.17.21'
 export {default as evaluateSymbolProperties } from './utils/evaluateSymbolProperties.ts'
 export {default as exceptions} from './utils/exceptions.ts'
-export {default as TypedInput} from './utils/typedInputs.ts'
+export {default as TypedInput} from './utils/typedInput.ts'
