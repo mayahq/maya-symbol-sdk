@@ -8,10 +8,13 @@ type SelectOption = {
 type TypedInputArgs = {
     type: PrimitiveTypes;
     value: string | TypedInput;
-    allowedTypes?: ListPrimitiveTypes
+    allowedTypes?: ListPrimitiveTypes;
     defaultValue?: string | TypedInput;
-    options?: GenericArray<string> | GenericArray<SelectOption> | GenericArray<TypedInput>
-
+    options?: GenericArray<string> | GenericArray<SelectOption> | GenericArray<TypedInput>;
+    label?: string;
+    width?: string;
+    placeholder?: string;
+    allowInput?: boolean;
 }
 
 class TypedInput {
@@ -28,14 +31,63 @@ class TypedInput {
             this.value = ""
             this.type = "str"
         }
-        this.metadata =  {};
+        this.metadata =  {schema: {}, component: ""};
+        switch(input.type){
+            case "str":
+            case "num":
+            case "bool":
+            case "json":
+            case "date":
+            case "re":
+            case "msg":
+            case "global":
+            case "bin":{
+                this.metadata["component"] = "input"
+                break;
+            }
+            case "password": {
+                this.metadata["component"] = "password"
+                break;
+            }
+            case "select": {
+                this.metadata["component"] = "select"
+                break;
+            }
+            case "radio": {
+                this.metadata["component"] = "radio"
+                break;
+            }
+            case "checkbox": {
+                this.metadata["component"] = "checkbox"
+                break;
+            }
+        }
         if(input.allowedTypes){
-            this.metadata["allowedTypes"] = input.allowedTypes;
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["allowedTypes"] = input.allowedTypes;
         } else {
-            this.metadata["allowedTypes"] = ["str", "msg", "global"];
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["allowedTypes"] = ["str", "msg", "global"];
         }
         if(input.options){
-            this.metadata["options"] = input.options;
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["options"] = input.options;
+        }
+        if(input.label){
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["label"] = input.label;
+        }
+        if(input.allowInput){
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["allowInput"] = input.allowInput;
+        }
+        if(input.width){
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["width"] = input.width;
+        }
+        if(input.placeholder){
+            //@ts-ignore: metadata content
+            this.metadata["schema"]["placeholder"] = input.placeholder;
         }
     }
 
