@@ -29,6 +29,8 @@ class Symbol {
     id = "";
     name = "";
     type = "";
+    isConfig = false;
+    category: string;
     properties: Properties = {};
     children: Children = {
         wires: {
@@ -60,6 +62,8 @@ class Symbol {
         id: string,
         name: string,
         type: string,
+        category: string,
+        isConfig: boolean,
         properties: {
             [name: string]: {
                 value: string,
@@ -92,6 +96,8 @@ class Symbol {
             this.id = symbolRepr.id;
             this.name = symbolRepr.name;
             this.type = symbolRepr.type;
+            this.isConfig = symbolRepr.isConfig;
+            this.category = symbolRepr.category;
             for (const [key, obj] of Object.entries(symbolRepr.properties)){
                 this.properties[key].value = symbolRepr.properties[key].value
                 this.properties[key].type = symbolRepr.properties[key].type

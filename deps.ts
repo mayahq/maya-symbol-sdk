@@ -56,6 +56,8 @@ export type Metadata = {
     step_id: string;
     tmp_id: string;
     prefix: string;
+    color: string;
+    icon: string;
 } | Record<string, never>
 
 export {default as lodash} from 'npm:lodash@4.17.21'
