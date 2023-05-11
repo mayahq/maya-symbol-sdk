@@ -1,11 +1,25 @@
 
 import { OnMessageCallback, ChildWires, Properties, Metadata, Wires, PrimitiveTypes, TypedInput, TypedMetadata } from "../deps.ts";
 import evaluateSymbolProperty from "../utils/evaluateSymbolProperties.ts";
+import generateId from "../utils/generateId.ts";
 
 interface Children {
     wires: ChildWires,
-    symbols: Symbol[]
+    symbols: Symbol[] | []
 };
+type ToJSON = {
+    id: string;
+    name: string;
+    type: string;
+    description: string;
+    isConfig: boolean;
+    category: string;
+    properties: Properties;
+    children?: Children;
+    metadata?: Metadata;
+    schema?: Schema;
+    wires: Wires;
+}
 
 interface Schema {
     inputSchema?: {
@@ -32,7 +46,7 @@ class Symbol {
     isConfig = false;
     category = "";
     properties: Properties = {};
-    children: Children = {
+    children?: Children = {
         wires: {
             in: [[]],
             out: [[]]
@@ -55,24 +69,18 @@ class Symbol {
         outputSchema: {},
         propertiesSchema: {}
     }
-    wires: Wires = [[]]
+    wires: Wires = [[]];
     description = "";
 
     runtime: unknown;
 
     constructor(runtime: unknown | undefined, symbolRepr: {
-        id: string,
         name: string,
         type: string,
         category: string,
         isConfig: boolean,
-        properties: {
-            [name: string]: {
-                value: string,
-                type: PrimitiveTypes
-            }
-        },
-        wires: [[]],
+        properties: Properties,
+        wires: Wires,
         metadata?: Metadata,
         description?: string,
         schema?: {
@@ -91,20 +99,22 @@ class Symbol {
             propertiesSchema?: {
                 [name: string]:  Record<string, unknown>;
             }
-        }
+        },
+        children?:Children
+
     } | undefined) {
         this.runtime = runtime;
         if(symbolRepr){
-            this.id = symbolRepr.id;
+            this.id = generateId();
             this.name = symbolRepr.name;
             this.type = symbolRepr.type;
             this.isConfig = symbolRepr.isConfig;
-            this.category = symbolRepr.category;
+            this.category = symbolRepr.category ? symbolRepr.category : this.category;
             for (const [key, obj] of Object.entries(symbolRepr.properties)){
                 this.properties[key].value = symbolRepr.properties[key].value
                 this.properties[key].type = symbolRepr.properties[key].type
             }
-            this.children = {
+            this.children = symbolRepr?.children || {
                 wires: {
                     in:[[]],
                     out: [[]]
@@ -209,6 +219,73 @@ class Symbol {
             });
         }
         return evaluated;
+    }
+
+    static toJSON(properties: Properties, name?:string, isConfig?:boolean, description?: string, category?: string, wires?: Wires): string {
+        function dummy(){}
+        const symRepr = {
+            name: name ? name: this.name,
+            type: "",
+            isConfig: isConfig ? isConfig : false,
+            description: description ? description: "",
+            properties: properties,
+            category: category ? category: "",
+            wires: wires ? wires : [[]]
+        }
+        const sym: Symbol = new Symbol(dummy, symRepr)
+        const out: ToJSON = {
+            id: sym.id,
+            name: sym.name,
+            type: sym.type,
+            isConfig: sym.isConfig,
+            category: sym.category,
+            description: sym.description,
+            properties: sym.properties,
+            schema: sym.schema,
+            children: sym.children,
+            metadata: sym.metadata,
+            wires: sym.wires
+        }
+        return JSON.stringify(out, null, 2);
+    }
+
+    static fromJSON(symbolRepr: string, callback?: OnMessageCallback): Symbol {
+        function dummy(){}
+        try {
+            const parsed: {
+                name: string,
+                type: string,
+                category: string,
+                isConfig: boolean,
+                properties: Properties,
+                wires: Wires,
+                metadata?: Metadata,
+                description?: string,
+                schema?: {
+                    inputSchema?: {
+                        [name: string]: {
+                            type: unknown;
+                            description: string;
+                        };
+                    },
+                    outputSchema?: {
+                        [name: string]: {
+                            type: unknown;
+                            description: string;
+                        };
+                    }
+                    propertiesSchema?: {
+                        [name: string]:  Record<string, unknown>;
+                    }
+                },
+                children?:Children
+        
+            } = JSON.parse(symbolRepr)
+            const sym: Symbol = new Symbol(callback ? callback : dummy, parsed)
+            return sym
+        } catch (error) {
+            throw error
+        }
     }
 }
 

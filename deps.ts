@@ -42,10 +42,10 @@ export interface Properties {
     } | TypedInput
 }
 
-export type Wires = string[][]
+export type Wires = Array<Array<string>> | [[]];
 export interface ChildWires {
-    in: string[][]
-    out: string[][]
+    in: Array<Array<string>> | [[]];
+    out: Array<Array<string>> | [[]];
 }
 export type Position = {
     x: number
@@ -58,7 +58,7 @@ export type Metadata = {
     prefix: string;
     color: string;
     icon: string;
-} | Record<string, never>
+} | Record<string, unknown>
 
 export {default as lodash} from 'npm:lodash@4.17.21'
 export {default as evaluateSymbolProperties } from './utils/evaluateSymbolProperties.ts'
