@@ -10,22 +10,6 @@ export type PrimitiveTypes = 'str' | 'num' | 'bool' | 'json' | 'date' | 'msg' | 
 export type ComponentTypes = 'input' | 'select' | 'checkbox' | 'radio' | 'toggle' | 'editable-table';
 
 export type ListPrimitiveTypes = Array<PrimitiveTypes>
-// export interface PropertySchemaOption {
-//     allowedTypes?: ListPrimitiveTypes;
-//     defaultValues?: string | TypedInput;
-//     width?: string;
-//     placeholder?: string;
-//     allowInput?: boolean
-// }
-// export interface PropertySchemaInner {
-//     label: string;
-//     component: ComponentTypes;
-//     options?: PropertySchemaOption | PropertySchemaOption[]
-// }
-
-// export interface PropertySchema {
-//     [name: string]: PropertySchemaInner;
-// }
 
 type SelectOption = {
     label: string;
@@ -36,7 +20,7 @@ export type TypedInputArgs = {
     value: string | TypedInput;
     allowedTypes?: ListPrimitiveTypes;
     defaultValue?: string | TypedInput;
-    options?: GenericArray<string> | GenericArray<SelectOption> | GenericArray<TypedInput>;
+    options?: TypedMetadataOptions;
     label?: string;
     width?: string;
     placeholder?: string;
