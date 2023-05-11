@@ -155,13 +155,13 @@ class Symbol {
         this._evaluatePropertyMetadata(this)
     }
 
-    private _messageHandler(callback: OnMessageCallback, msg:Record<string, unknown>): void {
+    private _messageHandler(msg:Record<string, unknown>, callback: OnMessageCallback, result = false): void | unknown {
         const vals: Record<string, unknown> = evaluateSymbolProperty(this, msg)
-        this.onMessage(callback, msg, vals)
+        return this.onMessage(callback, msg, vals, result)
     }
     
-    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>, vals: unknown): void {
-        
+    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>, vals: unknown, result = false): void | unknown {
+        return msg
     }
 
     _evaluatePropertyMetadata(symbol: Symbol): {[name:string]:TypedMetadata} | undefined  {
@@ -286,6 +286,31 @@ class Symbol {
         } catch (error) {
             throw error
         }
+    }
+
+    run(args: Record<string, unknown>, callback?: OnMessageCallback): unknown {
+        function compareObjects(obj1: any, obj2: any): boolean {
+            for (let key in obj1) {
+                if (!(key in obj2)) {
+                    return false;
+                }
+                const value1 = obj1[key];
+                const value2 = obj2[key];
+                if (typeof value1 === "object" && typeof value2 === "object") {
+                    const result = compareObjects(value1, value2);
+                    if (result !== null) {
+                        return result;
+                    }
+                }
+            }
+            return true; // Objects match, no error
+        }
+        if(!compareObjects(this.schema?.inputSchema, args)){
+            console.warn(`Input type does not match the expected type`)
+        }
+        function dummy(){}
+        const result = this._messageHandler(args, callback ? callback : dummy);
+        return result
     }
 }
 
