@@ -30,7 +30,7 @@ class Symbol {
     name = "";
     type = "";
     isConfig = false;
-    category: string;
+    category = "";
     properties: Properties = {};
     children: Children = {
         wires: {
@@ -46,7 +46,9 @@ class Symbol {
         },
         prefix: "",
         step_id: "",
-        tmp_id: ""
+        tmp_id: "",
+        color: "",
+        icon: ""
     };
     schema?: Schema = {
         inputSchema: {},
@@ -117,7 +119,9 @@ class Symbol {
                 },
                 prefix: "",
                 step_id: "",
-                tmp_id: ""
+                tmp_id: "",
+                color: "",
+                icon: ""
             };
             this.description = symbolRepr.description || "";
             if(symbolRepr.schema){
