@@ -8,10 +8,19 @@ interface Children {
 };
 
 interface Schema {
-    inputSchema: {
-        [name:string]: PrimitiveTypes;
+    inputSchema?: {
+        [name:string]: {
+            type: unknown;
+            description: string;
+        };
     }
-    propertiesSchema: {
+    outputSchema?: {
+        [name:string]: {
+            type: unknown;
+            description: string;
+        };
+    }
+    propertiesSchema?: {
         [name:string]: TypedMetadata
     }
 }
@@ -37,8 +46,9 @@ class Symbol {
         step_id: "",
         tmp_id: ""
     };
-    schema: Schema = {
+    schema?: Schema = {
         inputSchema: {},
+        outputSchema: {},
         propertiesSchema: {}
     }
     wires: Wires = [[]]
@@ -57,15 +67,22 @@ class Symbol {
             }
         },
         wires: [[]],
-        metadata: Metadata,
+        metadata?: Metadata,
         description?: string,
-        schema: {
-            inputSchema: {
+        schema?: {
+            inputSchema?: {
                 [name: string]: {
-                    type: PrimitiveTypes,
-                }
+                    type: unknown;
+                    description: string;
+                };
             },
-            propertiesSchema: {
+            outputSchema?: {
+                [name: string]: {
+                    type: unknown;
+                    description: string;
+                };
+            }
+            propertiesSchema?: {
                 [name: string]: {
                     metadata?: Record<string, unknown> 
                 }
@@ -99,8 +116,19 @@ class Symbol {
                 tmp_id: ""
             };
             this.description = symbolRepr.description || "";
-            for (const [key, obj] of Object.entries(symbolRepr.properties)){
-                this.properties[key] = symbolRepr.properties[key]
+            if(symbolRepr.schema){
+                if(symbolRepr.schema.inputSchema){
+                    for (const [key, obj] of Object.entries(symbolRepr!["schema"]!["inputSchema"]!)){
+                        this!["schema"]!["inputSchema"]![key].type = symbolRepr!["schema"]!["inputSchema"]![key].type
+                        this!["schema"]!["inputSchema"]![key].description = symbolRepr!["schema"]!["inputSchema"]![key].description
+                    }
+                }
+                if(symbolRepr.schema.outputSchema){
+                    for (const [key, obj] of Object.entries(symbolRepr!["schema"]!["outputSchema"]!)){
+                        this!["schema"]!["outputSchema"]![key].type = symbolRepr!["schema"]!["outputSchema"]![key].type
+                        this!["schema"]!["outputSchema"]![key].description = symbolRepr!["schema"]!["outputSchema"]![key].description
+                    }
+                }
             }
         }
     }
@@ -118,63 +146,60 @@ class Symbol {
         
     }
 
-    _evaluatePropertyMetadata(symbol: Symbol): Record<string, unknown> {
-        const evaluated:{[name:string]:TypedMetadata} = this.schema.propertiesSchema;
-        Object.entries(symbol.properties).forEach(([property, propVal]) => {
-            try {
-                const type: PrimitiveTypes = propVal.type;
-                if(!(propVal instanceof TypedInput)){
-                    switch (type) {
-                        case "str":
-                        case "bool":
-                        case "num": 
-                        case "json": {
-                            const propertySchemaInner: TypedMetadata = {
-                                label: property,
-                                component: "input"
+    _evaluatePropertyMetadata(symbol: Symbol): {[name:string]:TypedMetadata} | undefined  {
+        const evaluated:{[name:string]:TypedMetadata} | undefined = this!["schema"]!["propertiesSchema"];
+        if(this.schema && this.schema.propertiesSchema){
+            Object.entries(symbol.properties).forEach(([property, propVal]) => {
+                try {
+                    const type: PrimitiveTypes = propVal.type;
+                    if(!(propVal instanceof TypedInput)){
+                        switch (type) {
+                            case "str":
+                            case "bool":
+                            case "num": 
+                            case "json": {
+                                const propertySchemaInner: TypedMetadata = {
+                                    label: property,
+                                    component: "input"
+                                }
+                                evaluated![property] = propertySchemaInner
+                                break;
                             }
-                            evaluated[property] = propertySchemaInner
-                            break;
+                            default: {
+                                console.log("No match");
+                                return undefined
+                            }
                         }
-                        default: {
-                            console.log("No match");
-                            return undefined
-                        }
-                    }
-                } else {
-                    switch (type) {
-                        case "str":
-                        case "bool":
-                        case "num": 
-                        case "json":
-                        case "msg":
-                        case "global":{
-                            evaluated[property].component = "input";
-                            evaluated[property].label = propVal.metadata?.label || property;
-                            evaluated[property].options = propVal.metadata?.options || {};
-                            //@ts-ignore: these won't be undefined
-                            evaluated[property].options?.allowInput = propVal.metadata?.options?.allowInput ? propVal.metadata?.options?.allowInput : true;
-                            //@ts-ignore: these won't be undefined
-                            evaluated[property].options?.allowedTypes = propVal.metadata?.options?.allowedTypes ? propVal.metadata?.options?.allowedTypes: ["msg", "global", "str"];
-                            //@ts-ignore: these won't be undefined
-                            evaluated[property].options?.defaultValues = propVal.metadata?.options?.defaultValues ? propVal.metadata?.options?.defaultValues : "";
-                            //@ts-ignore: these won't be undefined
-                            evaluated[property].options?.placeholder = propVal.metadata?.options?.placeholder ? propVal.metadata?.options?.placeholder: "";
-                            //@ts-ignore: these won't be undefined
-                            evaluated[property].options?.width = propVal.metadata?.options?.width ? propVal.metadata?.options?.width : "40px";
-                            break;
-                        }
-                        default: {
-                            console.log("No match");
-                            return undefined
+                    } else {
+                        switch (type) {
+                            case "str":
+                            case "bool":
+                            case "num": 
+                            case "json":
+                            case "msg":
+                            case "global":{
+                                evaluated![property].component = "input";
+                                evaluated![property].label = propVal.metadata?.label || property;
+                                evaluated![property].options = propVal.metadata?.options || {};
+                                evaluated![property]!["options"]!["allowInput"] = propVal.metadata?.options?.allowInput ? propVal.metadata?.options?.allowInput : true;
+                                evaluated![property]!["options"]!["allowedTypes"] = propVal.metadata?.options?.allowedTypes ? propVal.metadata?.options?.allowedTypes: ["msg", "global", "str"];
+                                evaluated![property]!["options"]!["defaultValues"] = propVal.metadata?.options?.defaultValues ? propVal.metadata?.options?.defaultValues : "";
+                                evaluated![property]!["options"]!["placeholder"] = propVal.metadata?.options?.placeholder ? propVal.metadata?.options?.placeholder: "";
+                                evaluated![property]!["options"]!["width"] = propVal.metadata?.options?.width ? propVal.metadata?.options?.width : "40px";
+                                break;
+                            }
+                            default: {
+                                console.log("No match");
+                                return undefined
+                            }
                         }
                     }
+                } catch (error) {
+                    console.error(`Error evaluating ${property} in ${symbol.id}:${symbol.type}:${symbol.name}`, error)
+                    throw error
                 }
-            } catch (error) {
-                console.error(`Error evaluating ${property} in ${symbol.id}:${symbol.type}:${symbol.name}`, error)
-                throw error
-            }
-        });
+            });
+        }
         return evaluated;
     }
 }
