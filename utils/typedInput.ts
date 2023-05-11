@@ -1,9 +1,18 @@
-import { PrimitiveTypes, TypedMetadata, TypedInputArgs } from "../deps.ts";
+import { PrimitiveTypes, TypedInputArgs, ComponentTypes, ListPrimitiveTypes, TypedInputOptions } from "../deps.ts";
 
 class TypedInput {
     value: string | TypedInput;
-    type: PrimitiveTypes;
-    metadata?: TypedMetadata;
+    type: PrimitiveTypes = "str";
+    label?: string;
+    component?: ComponentTypes = "input";
+    allowedTypes?: ListPrimitiveTypes = ["str", "msg", "global"];
+    allowedInput?: boolean = true;
+    options?: TypedInputOptions = {};
+    width?: string;
+    placeholder?: string;
+
+
+    // metadata?: TypedMetadata;
     
     constructor(input:TypedInputArgs){
         if(input.value && input.type) {
@@ -13,9 +22,7 @@ class TypedInput {
             this.value = ""
             this.type = "str"
         }
-        this.metadata =  {
-            component: ""
-        };
+
         switch(input.type){
             case "str":
             case "num":
@@ -25,46 +32,40 @@ class TypedInput {
             case "re":
             case "msg":
             case "global":
+            case "password":
             case "bin":{
-                this.metadata["component"] = "input"
-                break;
-            }
-            case "password": {
-                this.metadata["component"] = "password"
+                this["component"] = "input"
                 break;
             }
             case "select": {
-                this.metadata["component"] = "select"
+                this["component"] = "select"
                 break;
             }
             case "radio": {
-                this.metadata["component"] = "radio"
+                this["component"] = "radio"
                 break;
             }
             case "checkbox": {
-                this.metadata["component"] = "checkbox"
+                this["component"] = "checkbox"
                 break;
             }
         }
         if(input.label){
-            //@ts-ignore: metadata content
-            this.metadata["label"] = input.label;
+            this!["label"] = input.label;
         }
         if(input.options){
-            this.metadata!["options"] = input.options;
+            this!["options"] = input.options;
             if(input.allowedTypes){
-                this.metadata!["options"]!["allowedTypes"] = input.allowedTypes;
-            } else {
-                this.metadata!["options"]!["allowedTypes"] = ["str", "msg", "global"];
+                this!["options"]!["allowedTypes"] = input.allowedTypes;
             }
             if(input.allowInput){
-                this.metadata!["options"]!["allowInput"] = input.allowInput;
+                this!["options"]!["allowInput"] = input.allowInput;
             }
             if(input.width){
-                this.metadata!["options"]!["width"] = input.width;
+                this!["options"]!["width"] = input.width;
             }
             if(input.placeholder){
-                this.metadata!["options"]!["placeholder"] = input.placeholder;
+                this!["options"]!["placeholder"] = input.placeholder;
             }
         }
     }

@@ -83,9 +83,7 @@ class Symbol {
                 };
             }
             propertiesSchema?: {
-                [name: string]: {
-                    metadata?: Record<string, unknown> 
-                }
+                [name: string]:  Record<string, unknown>;
             }
         }
     } | undefined) {
@@ -179,13 +177,13 @@ class Symbol {
                             case "msg":
                             case "global":{
                                 evaluated![property].component = "input";
-                                evaluated![property].label = propVal.metadata?.label || property;
-                                evaluated![property].options = propVal.metadata?.options || {};
-                                evaluated![property]!["options"]!["allowInput"] = propVal.metadata?.options?.allowInput ? propVal.metadata?.options?.allowInput : true;
-                                evaluated![property]!["options"]!["allowedTypes"] = propVal.metadata?.options?.allowedTypes ? propVal.metadata?.options?.allowedTypes: ["msg", "global", "str"];
-                                evaluated![property]!["options"]!["defaultValues"] = propVal.metadata?.options?.defaultValues ? propVal.metadata?.options?.defaultValues : "";
-                                evaluated![property]!["options"]!["placeholder"] = propVal.metadata?.options?.placeholder ? propVal.metadata?.options?.placeholder: "";
-                                evaluated![property]!["options"]!["width"] = propVal.metadata?.options?.width ? propVal.metadata?.options?.width : "40px";
+                                evaluated![property].label = propVal?.label || property;
+                                evaluated![property].options = propVal?.options || {};
+                                evaluated![property]!["options"]!["allowInput"] = propVal?.options?.allowInput ? propVal?.options?.allowInput : true;
+                                evaluated![property]!["options"]!["allowedTypes"] = propVal?.options?.allowedTypes ? propVal?.options?.allowedTypes: ["msg", "global", "str"];
+                                evaluated![property]!["options"]!["defaultValues"] = propVal?.options?.defaultValues ? propVal?.options?.defaultValues : "";
+                                evaluated![property]!["options"]!["placeholder"] = propVal?.options?.placeholder ? propVal?.options?.placeholder: "";
+                                evaluated![property]!["options"]!["width"] = propVal?.options?.width ? propVal?.options?.width : "40px";
                                 break;
                             }
                             default: {

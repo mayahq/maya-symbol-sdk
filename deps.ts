@@ -10,24 +10,19 @@ export type PrimitiveTypes = 'str' | 'num' | 'bool' | 'json' | 'date' | 'msg' | 
 export type ComponentTypes = 'input' | 'select' | 'checkbox' | 'radio' | 'toggle' | 'editable-table';
 
 export type ListPrimitiveTypes = Array<PrimitiveTypes>
-
-type SelectOption = {
-    label: string;
-    value: string;
-}
 export type TypedInputArgs = {
     type: PrimitiveTypes;
     value: string | TypedInput;
     allowedTypes?: ListPrimitiveTypes;
     defaultValue?: string | TypedInput;
-    options?: TypedMetadataOptions;
+    options?: TypedInputOptions;
     label?: string;
     width?: string;
     placeholder?: string;
     allowInput?: boolean;
 }
 
-export type TypedMetadataOptions = {
+export type TypedInputOptions = {
     allowedTypes?: ListPrimitiveTypes;
     defaultValues?: string | TypedInput;
     width?: string;
@@ -38,7 +33,7 @@ export type TypedMetadataOptions = {
 export type TypedMetadata = {
     component: string;
     label?: string;
-    options?: TypedMetadataOptions
+    options?: TypedInputOptions
 }
 export interface Properties {
     [name: string]: {
