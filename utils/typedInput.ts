@@ -51,26 +51,20 @@ class TypedInput {
             this.metadata["label"] = input.label;
         }
         if(input.options){
-            //@ts-ignore: metadata content
-            this.metadata["options"] = input.options;
+            this.metadata!["options"] = input.options;
             if(input.allowedTypes){
-                //@ts-ignore: metadata content
-                this.metadata["options"]["allowedTypes"] = input.allowedTypes;
+                this.metadata!["options"]!["allowedTypes"] = input.allowedTypes;
             } else {
-                //@ts-ignore: metadata content
-                this.metadata["options"]["allowedTypes"] = ["str", "msg", "global"];
+                this.metadata!["options"]!["allowedTypes"] = ["str", "msg", "global"];
             }
             if(input.allowInput){
-                //@ts-ignore: metadata content
-                this.metadata["options"]["allowInput"] = input.allowInput;
+                this.metadata!["options"]!["allowInput"] = input.allowInput;
             }
             if(input.width){
-                //@ts-ignore: metadata content
-                this.metadata["options"]["width"] = input.width;
+                this.metadata!["options"]!["width"] = input.width;
             }
             if(input.placeholder){
-                //@ts-ignore: metadata content
-                this.metadata["options"]["placeholder"] = input.placeholder;
+                this.metadata!["options"]!["placeholder"] = input.placeholder;
             }
         }
     }
