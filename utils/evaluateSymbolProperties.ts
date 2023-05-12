@@ -3,7 +3,7 @@ import { PrimitiveTypes } from "../src/Symbol.d.ts";
 import exceptions from "./exceptions.ts";
 import { lodash } from "../deps.ts";
 
-function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, unknown>): Record<string, unknown> {
+function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, unknown>): Record<string, any> {
     const evaluated: Record<string, unknown> = {}
     Object.entries(symbol.properties).forEach(([property, propVal]) => {
         try {
