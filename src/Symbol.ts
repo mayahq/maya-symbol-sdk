@@ -73,16 +73,17 @@ class Symbol implements SymbolImpl {
         }
     }
 
-    onInit(_callback: OnMessageCallback): void {
+    async _runtimeMessageHandler(msg:Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
+        const vals: Record<string, any> = evaluateSymbolProperty(this, msg)
+        await this.onMessage(msg, vals, callback)
+        
+    }
+    async onInit(_callback: OnMessageCallback): Promise<void> {
         this.evaluatePropertyMetadata(this)
     }
 
-    messageHandler(msg:Record<string, unknown>, callback: OnMessageCallback): void {
-        const vals: Record<string, unknown> = evaluateSymbolProperty(this, msg)
-        this.onMessage(callback, msg, vals)
-    }
-    
-    onMessage(_callback: OnMessageCallback, _msg: Record<string, unknown>, _vals: unknown): void {
+    private async onMessage(_msg: Record<string, any>, _vals: Record<string, any>, _callback: OnMessageCallback): Promise<OnMessageCallback> {
+        return new Promise(_callback)
     }
 
     private evaluatePropertyMetadata(symbol: Symbol) : {[name:string]:TypedMetadata} | undefined  {
