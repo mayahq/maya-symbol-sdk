@@ -1,4 +1,4 @@
-import type {TypedInput} from "../mods.ts";
+import type {TypedInput} from "../mod.ts";
 
 export interface OnMessageCallback { (done: unknown): void}
 
