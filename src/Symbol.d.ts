@@ -82,24 +82,18 @@ interface Schema {
     }
 }
 
-export interface SymbolType {
-    id: string;
-    name: string;
-    type: string;
-    description: string;
-    isConfig: boolean;
-    category: string;
+export interface SymbolImpl {
+    editorLabel?: string;
     properties: Properties;
     children?: Children;
     metadata?: Metadata;
-    schema?: Schema;
     wires: Wires;
 }
 
-type ToJSON = {
+type SymbolStatic = {
     id: string;
-    name: string;
     type: string;
+    paletteLabel: string;
     description: string;
     isConfig: boolean;
     category: string;
@@ -107,5 +101,6 @@ type ToJSON = {
     children?: Children;
     metadata?: Metadata;
     schema?: Schema;
-    wires: Wires;
 }
+
+export interface SymbolType extends SymbolImpl, SymbolStatic {}

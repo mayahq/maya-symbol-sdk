@@ -1,16 +1,25 @@
 
-import type { OnMessageCallback, Properties, Metadata, Wires, PrimitiveTypes, TypedMetadata, SymbolType, Children, Schema, ToJSON } from "./Symbol.d.ts"
+import type { OnMessageCallback, Properties, Metadata, Wires, PrimitiveTypes, TypedMetadata, SymbolType, Children, Schema, SymbolImpl } from "./Symbol.d.ts"
 import evaluateSymbolProperty from "../utils/evaluateSymbolProperties.ts";
 import generateId from "../utils/generateId.ts";
 import {TypedInput} from "../mods.ts"
 
-class Symbol implements SymbolType{
+
+
+class Symbol implements SymbolImpl {
+    static paletteLabel = "";
+    static type = "";
+    static isConfig = false;
+    static category = "";
+    static schema?: Schema = {
+        inputSchema: {},
+        outputSchema: {},
+        propertiesSchema: {}
+    }
+    static description = "";
+    
     id = "";
-    name = "";
-    type = "";
-    isConfig = false;
-    category = "";
-    properties: Properties = {};
+    editorLabel = "";
     children?: Children = {
         wires: {
             in: [[]],
@@ -18,6 +27,7 @@ class Symbol implements SymbolType{
         },
         symbols: []
     };
+    properties: Properties = {};
     metadata: Metadata = {
         position: {
             x: 0,
@@ -29,17 +39,11 @@ class Symbol implements SymbolType{
         color: "",
         icon: ""
     };
-    schema?: Schema = {
-        inputSchema: {},
-        outputSchema: {},
-        propertiesSchema: {}
-    }
     wires: Wires = [[]];
-    description = "";
 
     runtime: unknown;
 
-    constructor(runtime: unknown | undefined, args: SymbolType) {
+    constructor(runtime: unknown | undefined, args: SymbolImpl) {
         this.runtime = runtime;
         if(args){
             for (const [key, obj] of Object.entries(args.properties)){
@@ -66,27 +70,26 @@ class Symbol implements SymbolType{
                 color: "",
                 icon: ""
             };
-            this.description = args.description || "";
         }
     }
 
-    onInit(callback: OnMessageCallback): void {
-        this._evaluatePropertyMetadata(this)
+    onInit(_callback: OnMessageCallback): void {
+        this.evaluatePropertyMetadata(this)
     }
 
-    private _messageHandler(msg:Record<string, unknown>, callback: OnMessageCallback): void {
+    messageHandler(msg:Record<string, unknown>, callback: OnMessageCallback): void {
         const vals: Record<string, unknown> = evaluateSymbolProperty(this, msg)
         this.onMessage(callback, msg, vals)
     }
     
-    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>, vals: unknown): void {
+    onMessage(_callback: OnMessageCallback, _msg: Record<string, unknown>, _vals: unknown): void {
     }
 
-    _evaluatePropertyMetadata(symbol: Symbol): {[name:string]:TypedMetadata} | undefined  {
-        const evaluated:{[name:string]:TypedMetadata} | undefined = this!["schema"]!["propertiesSchema"];
-        if(this.schema && this.schema.propertiesSchema){
+    private evaluatePropertyMetadata(symbol: Symbol) : {[name:string]:TypedMetadata} | undefined  {
+        const evaluated:{[name:string]:TypedMetadata} | undefined = Symbol!["schema"]!["propertiesSchema"];
+        if(Symbol.schema && Symbol.schema.propertiesSchema){
             Object.entries(symbol.properties).forEach(([property, propVal]) => {
-                try {
+                try{ 
                     const type: PrimitiveTypes = propVal.type;
                     if(!(propVal instanceof TypedInput)){
                         switch (type) {
@@ -131,7 +134,7 @@ class Symbol implements SymbolType{
                         }
                     }
                 } catch (error) {
-                    console.error(`Error evaluating ${property} in ${symbol.id}:${symbol.type}:${symbol.name}`, error)
+                    console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
                     throw error
                 }
             });
@@ -139,28 +142,32 @@ class Symbol implements SymbolType{
         return evaluated;
     }
 
-    static toJSON(properties: Properties, name?:string, isConfig?:boolean, description?: string, category?: string, wires?: Wires): string {
+    static toJSON(dsl: SymbolType): string {
         function dummy(){}
-        const symRepr: SymbolType = {
-            id: generateId(),
-            name: name ? name: this.name,
-            type: "",
-            isConfig: isConfig ? isConfig : false,
-            description: description ? description: "",
-            properties: properties,
-            category: category ? category: "",
-            wires: wires ? wires : [[]]
+        const symRepr: SymbolImpl = {
+            editorLabel: dsl.editorLabel ? dsl.editorLabel: this.name,
+            properties: dsl.properties,
+            wires: dsl.wires ? dsl.wires : [[]],
+            children: dsl.children ? dsl.children : {
+                wires: {
+                    in: [[]],
+                    out: [[]]
+                },
+                symbols: []
+            },
+            metadata: dsl.metadata ? dsl.metadata: {}
         }
         const sym: Symbol = new Symbol(dummy, symRepr)
-        const out: ToJSON = {
-            id: sym.id,
-            name: sym.name,
-            type: sym.type,
-            isConfig: sym.isConfig,
-            category: sym.category,
-            description: sym.description,
+        const out: SymbolType = {
+            id: generateId(),
+            type: this.type,
+            category: this.category,
+            isConfig: this.isConfig,
+            editorLabel: sym.editorLabel,
+            paletteLabel: this.paletteLabel,
+            description: this.description,
             properties: sym.properties,
-            schema: sym.schema,
+            schema: this.schema,
             children: sym.children,
             metadata: sym.metadata,
             wires: sym.wires
