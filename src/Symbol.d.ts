@@ -11,7 +11,7 @@ export type ComponentTypes = 'input' | 'select' | 'checkbox' | 'radio' | 'toggle
 export type ListPrimitiveTypes = Array<PrimitiveTypes>
 export type TypedInputArgs = {
     type: PrimitiveTypes;
-    value: string | TypedInput;
+    value: string | string[] | TypedInput;
     allowedTypes?: ListPrimitiveTypes;
     defaultValue?: string | TypedInput;
     options?: TypedInputOptions;
