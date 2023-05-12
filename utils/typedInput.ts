@@ -1,7 +1,7 @@
 import { PrimitiveTypes, TypedInputArgs, ComponentTypes, ListPrimitiveTypes, TypedInputOptions } from "../src/Symbol.d.ts";
 
 class TypedInput {
-    value: string | TypedInput;
+    value: string | string[] | TypedInput;
     type: PrimitiveTypes = "str";
     label?: string;
     component?: ComponentTypes = "input";
