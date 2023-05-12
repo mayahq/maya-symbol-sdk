@@ -1,45 +1,10 @@
 
-import { OnMessageCallback, ChildWires, Properties, Metadata, Wires, PrimitiveTypes, TypedInput, TypedMetadata } from "../deps.ts";
+import type { OnMessageCallback, Properties, Metadata, Wires, PrimitiveTypes, TypedMetadata, SymbolType, Children, Schema, ToJSON } from "./Symbol.d.ts"
 import evaluateSymbolProperty from "../utils/evaluateSymbolProperties.ts";
 import generateId from "../utils/generateId.ts";
+import {TypedInput} from "../mods.ts"
 
-interface Children {
-    wires: ChildWires,
-    symbols: Symbol[] | []
-};
-type ToJSON = {
-    id: string;
-    name: string;
-    type: string;
-    description: string;
-    isConfig: boolean;
-    category: string;
-    properties: Properties;
-    children?: Children;
-    metadata?: Metadata;
-    schema?: Schema;
-    wires: Wires;
-}
-
-interface Schema {
-    inputSchema?: {
-        [name:string]: {
-            type: unknown;
-            description: string;
-        };
-    }
-    outputSchema?: {
-        [name:string]: {
-            type: unknown;
-            description: string;
-        };
-    }
-    propertiesSchema?: {
-        [name:string]: TypedMetadata
-    }
-}
-
-class Symbol {
+class Symbol implements SymbolType{
     id = "";
     name = "";
     type = "";
@@ -74,47 +39,15 @@ class Symbol {
 
     runtime: unknown;
 
-    constructor(runtime: unknown | undefined, symbolRepr: {
-        name: string,
-        type: string,
-        category: string,
-        isConfig: boolean,
-        properties: Properties,
-        wires: Wires,
-        metadata?: Metadata,
-        description?: string,
-        schema?: {
-            inputSchema?: {
-                [name: string]: {
-                    type: unknown;
-                    description: string;
-                };
-            },
-            outputSchema?: {
-                [name: string]: {
-                    type: unknown;
-                    description: string;
-                };
-            }
-            propertiesSchema?: {
-                [name: string]:  Record<string, unknown>;
-            }
-        },
-        children?:Children
-
-    } | undefined) {
+    constructor(runtime: unknown | undefined, args: SymbolType) {
         this.runtime = runtime;
-        if(symbolRepr){
-            this.id = generateId();
-            this.name = symbolRepr.name;
-            this.type = symbolRepr.type;
-            this.isConfig = symbolRepr.isConfig;
-            this.category = symbolRepr.category ? symbolRepr.category : this.category;
-            for (const [key, obj] of Object.entries(symbolRepr.properties)){
-                this.properties[key].value = symbolRepr.properties[key].value
-                this.properties[key].type = symbolRepr.properties[key].type
+        if(args){
+            for (const [key, obj] of Object.entries(args.properties)){
+                this.properties[key].value = args.properties[key].value
+                this.properties[key].type = args.properties[key].type
             }
-            this.children = symbolRepr?.children || {
+
+            this.children = args?.children || {
                 wires: {
                     in:[[]],
                     out: [[]]
@@ -122,7 +55,7 @@ class Symbol {
                 symbols: []
             }
             this.wires = [[]];
-            this.metadata = symbolRepr.metadata || {
+            this.metadata = args.metadata || {
                 position: {
                     x: 0,
                     y: 0
@@ -133,21 +66,7 @@ class Symbol {
                 color: "",
                 icon: ""
             };
-            this.description = symbolRepr.description || "";
-            if(symbolRepr.schema){
-                if(symbolRepr.schema.inputSchema){
-                    for (const [key, obj] of Object.entries(symbolRepr!["schema"]!["inputSchema"]!)){
-                        this!["schema"]!["inputSchema"]![key].type = symbolRepr!["schema"]!["inputSchema"]![key].type
-                        this!["schema"]!["inputSchema"]![key].description = symbolRepr!["schema"]!["inputSchema"]![key].description
-                    }
-                }
-                if(symbolRepr.schema.outputSchema){
-                    for (const [key, obj] of Object.entries(symbolRepr!["schema"]!["outputSchema"]!)){
-                        this!["schema"]!["outputSchema"]![key].type = symbolRepr!["schema"]!["outputSchema"]![key].type
-                        this!["schema"]!["outputSchema"]![key].description = symbolRepr!["schema"]!["outputSchema"]![key].description
-                    }
-                }
-            }
+            this.description = args.description || "";
         }
     }
 
@@ -155,13 +74,12 @@ class Symbol {
         this._evaluatePropertyMetadata(this)
     }
 
-    private _messageHandler(msg:Record<string, unknown>, callback: OnMessageCallback, result = false): void | unknown {
+    private _messageHandler(msg:Record<string, unknown>, callback: OnMessageCallback): void {
         const vals: Record<string, unknown> = evaluateSymbolProperty(this, msg)
-        return this.onMessage(callback, msg, vals, result)
+        this.onMessage(callback, msg, vals)
     }
     
-    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>, vals: unknown, result = false): void | unknown {
-        return msg
+    onMessage(callback: OnMessageCallback, msg: Record<string, unknown>, vals: unknown): void {
     }
 
     _evaluatePropertyMetadata(symbol: Symbol): {[name:string]:TypedMetadata} | undefined  {
@@ -223,7 +141,8 @@ class Symbol {
 
     static toJSON(properties: Properties, name?:string, isConfig?:boolean, description?: string, category?: string, wires?: Wires): string {
         function dummy(){}
-        const symRepr = {
+        const symRepr: SymbolType = {
+            id: generateId(),
             name: name ? name: this.name,
             type: "",
             isConfig: isConfig ? isConfig : false,
@@ -252,65 +171,12 @@ class Symbol {
     static fromJSON(symbolRepr: string, callback?: OnMessageCallback): Symbol {
         function dummy(){}
         try {
-            const parsed: {
-                name: string,
-                type: string,
-                category: string,
-                isConfig: boolean,
-                properties: Properties,
-                wires: Wires,
-                metadata?: Metadata,
-                description?: string,
-                schema?: {
-                    inputSchema?: {
-                        [name: string]: {
-                            type: unknown;
-                            description: string;
-                        };
-                    },
-                    outputSchema?: {
-                        [name: string]: {
-                            type: unknown;
-                            description: string;
-                        };
-                    }
-                    propertiesSchema?: {
-                        [name: string]:  Record<string, unknown>;
-                    }
-                },
-                children?:Children
-        
-            } = JSON.parse(symbolRepr)
+            const parsed: SymbolType = JSON.parse(symbolRepr)
             const sym: Symbol = new Symbol(callback ? callback : dummy, parsed)
             return sym
         } catch (error) {
             throw error
         }
-    }
-
-    run(args: Record<string, unknown>, callback?: OnMessageCallback): unknown {
-        function compareObjects(obj1: any, obj2: any): boolean {
-            for (let key in obj1) {
-                if (!(key in obj2)) {
-                    return false;
-                }
-                const value1 = obj1[key];
-                const value2 = obj2[key];
-                if (typeof value1 === "object" && typeof value2 === "object") {
-                    const result = compareObjects(value1, value2);
-                    if (result !== null) {
-                        return result;
-                    }
-                }
-            }
-            return true; // Objects match, no error
-        }
-        if(!compareObjects(this.schema?.inputSchema, args)){
-            console.warn(`Input type does not match the expected type`)
-        }
-        function dummy(){}
-        const result = this._messageHandler(args, callback ? callback : dummy);
-        return result
     }
 }
 

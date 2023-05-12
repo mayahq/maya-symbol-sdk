@@ -1,6 +1,7 @@
 import Symbol from "../index.ts";
-import { PrimitiveTypes, lodash } from "../deps.ts";
+import { PrimitiveTypes } from "../src/Symbol.d.ts";
 import exceptions from "./exceptions.ts";
+import { lodash } from "../deps.ts";
 
 function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, unknown>): Record<string, unknown> {
     const evaluated: Record<string, unknown> = {}

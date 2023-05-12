@@ -1,4 +1,4 @@
-import { PrimitiveTypes, TypedInputArgs, ComponentTypes, ListPrimitiveTypes, TypedInputOptions } from "../deps.ts";
+import { PrimitiveTypes, TypedInputArgs, ComponentTypes, ListPrimitiveTypes, TypedInputOptions } from "../src/Symbol.d.ts";
 
 class TypedInput {
     value: string | TypedInput;
@@ -10,9 +10,6 @@ class TypedInput {
     options?: TypedInputOptions = {};
     width?: string;
     placeholder?: string;
-
-
-    // metadata?: TypedMetadata;
     
     constructor(input:TypedInputArgs){
         if(input.value && input.type) {
