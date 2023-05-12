@@ -2,8 +2,7 @@
 import type { OnMessageCallback, Properties, Metadata, Wires, PrimitiveTypes, TypedMetadata, SymbolType, Children, Schema, SymbolImpl } from "./Symbol.d.ts"
 import evaluateSymbolProperty from "../utils/evaluateSymbolProperties.ts";
 import generateId from "../utils/generateId.ts";
-import {TypedInput} from "../mods.ts"
-
+import {TypedInput} from "../mod.ts"
 
 
 class Symbol implements SymbolImpl {
@@ -43,7 +42,7 @@ class Symbol implements SymbolImpl {
 
     runtime: unknown;
 
-    constructor(runtime: unknown | undefined, args: SymbolImpl) {
+    constructor(runtime: unknown | undefined, args: SymbolType) {
         this.runtime = runtime;
         if(args){
             for (const [key, obj] of Object.entries(args.properties)){
@@ -143,35 +142,20 @@ class Symbol implements SymbolImpl {
         return evaluated;
     }
 
-    static toJSON(dsl: SymbolType): string {
-        function dummy(){}
-        const symRepr: SymbolImpl = {
-            editorLabel: dsl.editorLabel ? dsl.editorLabel: this.name,
-            properties: dsl.properties,
-            wires: dsl.wires ? dsl.wires : [[]],
-            children: dsl.children ? dsl.children : {
-                wires: {
-                    in: [[]],
-                    out: [[]]
-                },
-                symbols: []
-            },
-            metadata: dsl.metadata ? dsl.metadata: {}
-        }
-        const sym: Symbol = new Symbol(dummy, symRepr)
+    toJSON(): string {
         const out: SymbolType = {
             id: generateId(),
-            type: this.type,
-            category: this.category,
-            isConfig: this.isConfig,
-            editorLabel: sym.editorLabel,
-            paletteLabel: this.paletteLabel,
-            description: this.description,
-            properties: sym.properties,
-            schema: this.schema,
-            children: sym.children,
-            metadata: sym.metadata,
-            wires: sym.wires
+            type: Symbol.type,
+            category: Symbol.category,
+            isConfig: Symbol.isConfig,
+            editorLabel: this.editorLabel,
+            paletteLabel: Symbol.paletteLabel,
+            description: Symbol.description,
+            properties: this.properties,
+            schema: Symbol.schema,
+            children: this.children,
+            metadata: this.metadata,
+            wires: this.wires
         }
         return JSON.stringify(out, null, 2);
     }

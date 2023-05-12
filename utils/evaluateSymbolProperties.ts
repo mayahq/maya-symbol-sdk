@@ -1,4 +1,4 @@
-import {Symbol} from "../mods.ts";
+import {Symbol} from "../mod.ts";
 import { PrimitiveTypes } from "../src/Symbol.d.ts";
 import exceptions from "./exceptions.ts";
 import { lodash } from "../deps.ts";
