@@ -4,4 +4,4 @@ export {default as exceptions} from './utils/exceptions.ts'
 export {default as TypedInput} from './utils/typedInput.ts'
 export {default as generateId} from './utils/generateId.ts'
 
-export type {SymbolType, OnMessageCallback, PrimitiveTypes, ComponentTypes} from './src/Symbol.d.ts'
+export type {SymbolType, OnMessageCallback, PrimitiveTypes, ComponentTypes, Properties, Children, Metadata, Schema} from './src/Symbol.d.ts'
