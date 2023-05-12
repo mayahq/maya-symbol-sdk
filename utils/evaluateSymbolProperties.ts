@@ -1,4 +1,4 @@
-import Symbol from "../index.ts";
+import {Symbol} from "../mods.ts";
 import { PrimitiveTypes } from "../src/Symbol.d.ts";
 import exceptions from "./exceptions.ts";
 import { lodash } from "../deps.ts";
@@ -74,7 +74,7 @@ function evaluateSymbolProperty(symbol: Symbol, dynamicObject?: Record<string, u
                 }
             }
         } catch (error) {
-            console.error(`Error evaluating ${property} in ${symbol.id}:${symbol.type}:${symbol.name}`, error)
+            console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
             throw error
         }
     })
