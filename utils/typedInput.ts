@@ -12,7 +12,7 @@ class TypedInput extends Fields {
     allowInput?: boolean = true;
     width?: string;
     placeholder?: string;
-    defaultValue: ValueType = ""
+    defaultValue?: ValueType = ""
     
     constructor(input:TypedInputArgs){
         super()
