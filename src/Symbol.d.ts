@@ -66,7 +66,7 @@ export type Metadata = {
 
 interface Children {
     wires: ChildWires,
-    symbols: SymbolType[] | []
+    symbols: SymbolDsl[] | []
 }
 
 interface Schema {
@@ -96,27 +96,18 @@ export interface SymbolImpl {
     label?: string;
     children?: Children;
     metadata?: Metadata;
-    wires: Wires;
-}
-
-type SymbolStatic = {
-    type: string;
-    description: string;
-    isConfig: boolean;
-    properties: {
+    wires?: Wires;
+    properties?: {
         [fieldName: string]: PropertyObject
     };
-    children?: Children;
-    metadata?: Metadata;
-    schema: Schema;
 }
 
 export interface SymbolDsl {
     id: string;
     type: string;
-    description: string;
+    description?: string;
     isConfig: boolean;
-    properties: {
+    properties?: {
         [fieldName: string]: PropertyObject
     };
     children?: Children;
@@ -137,7 +128,7 @@ export interface SymbolDsl {
         propertiesSchema: {
             [name: string]: TypedMetadata
         }
-        editorProperties: {
+        editorProperties?: {
             icon: string;
             color: string;
             paletteLabel: string;
@@ -146,5 +137,3 @@ export interface SymbolDsl {
     };
     wires: Wires
 }
-
-export interface SymbolType extends SymbolStatic, SymbolImpl {}

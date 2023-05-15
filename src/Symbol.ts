@@ -22,9 +22,9 @@ class Symbol implements SymbolImpl {
     static description = "";
     
     readonly id: string = generateId();
-    properties: {
+    readonly properties: {
         [fieldName: string]: PropertyObject
-    } = {};
+    };
     children?: Children = {
         wires: {
             in: [[]],
@@ -32,7 +32,7 @@ class Symbol implements SymbolImpl {
         },
         symbols: []
     };
-    metadata: Metadata = {
+    metadata?: Metadata = {
         position: {
             x: 0,
             y: 0
@@ -67,18 +67,15 @@ class Symbol implements SymbolImpl {
             this.wires = args.wires;
         }
         if(args.metadata){
-            this.metadata = args.metadata || {
-                position: {
-                    x: 0,
-                    y: 0
-                },
-                prefix: "",
-                step_id: "",
-                tmp_id: ""
-            };
+            this.metadata = args.metadata
         }
         if(args.properties){
             this.properties = args.properties
+        } else {
+            this.properties = this.evaluateSymbolProperties(this, {})
+        }
+        if(args.wires){
+            this.wires = args.wires;
         }
     }
 
