@@ -7,7 +7,6 @@ import TypedInput from "../utils/typedInput.ts"
 class Symbol implements SymbolImpl {
     static type = "";
     static isConfig = false;
-    static category = "";
     static schema: Schema = {
         inputSchema: {},
         outputSchema: {},
