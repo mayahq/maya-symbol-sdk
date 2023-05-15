@@ -1,24 +1,30 @@
 
-import type { OnMessageCallback, Properties, Metadata, Wires, PrimitiveTypes, TypedMetadata, SymbolType, Children, Schema, SymbolImpl } from "./Symbol.d.ts"
-import evaluateSymbolProperty from "../utils/evaluateSymbolProperties.ts";
+import type { OnMessageCallback, Metadata, Wires, TypedMetadata, Children, Schema, SymbolImpl, SymbolDsl, Property, PropertyObject } from "./Symbol.d.ts"
 import generateId from "../utils/generateId.ts";
-import {TypedInput} from "../mod.ts"
+import TypedInput from "../utils/typedInput.ts"
 
 
 class Symbol implements SymbolImpl {
-    static paletteLabel = "";
     static type = "";
     static isConfig = false;
     static category = "";
-    static schema?: Schema = {
+    static schema: Schema = {
         inputSchema: {},
         outputSchema: {},
-        propertiesSchema: {}
+        propertiesSchema: {},
+        editorProperties: {
+            category: "",
+            icon: "",
+            color: "",
+            paletteLabel: ""
+        }
     }
     static description = "";
     
-    id = "";
-    editorLabel = "";
+    readonly id: string = generateId();
+    properties: {
+        [fieldName: string]: PropertyObject
+    } = {};
     children?: Children = {
         wires: {
             in: [[]],
@@ -26,7 +32,6 @@ class Symbol implements SymbolImpl {
         },
         symbols: []
     };
-    properties: Properties = {};
     metadata: Metadata = {
         position: {
             x: 0,
@@ -34,22 +39,22 @@ class Symbol implements SymbolImpl {
         },
         prefix: "",
         step_id: "",
-        tmp_id: "",
-        color: "",
-        icon: ""
+        tmp_id: ""
     };
     wires: Wires = [[]];
 
-    runtime: unknown;
+    runtime: {
+        [runtimeFields:string]: unknown 
+    };
 
-    constructor(runtime: unknown | undefined, args: SymbolType) {
+    constructor(runtime: {
+        [runtimeFields:string]: unknown 
+    }, args: SymbolDsl) {
+        if(args.id){
+            this.id = args.id
+        } 
         this.runtime = runtime;
-        if(args){
-            for (const [key, obj] of Object.entries(args.properties)){
-                this.properties[key].value = args.properties[key].value
-                this.properties[key].type = args.properties[key].type
-            }
-
+        if(args.children){
             this.children = args?.children || {
                 wires: {
                     in:[[]],
@@ -57,7 +62,11 @@ class Symbol implements SymbolImpl {
                 },
                 symbols: []
             }
-            this.wires = [[]];
+        }
+        if(args.wires) {
+            this.wires = args.wires;
+        }
+        if(args.metadata){
             this.metadata = args.metadata || {
                 position: {
                     x: 0,
@@ -65,94 +74,80 @@ class Symbol implements SymbolImpl {
                 },
                 prefix: "",
                 step_id: "",
-                tmp_id: "",
-                color: "",
-                icon: ""
+                tmp_id: ""
             };
+        }
+        if(args.properties){
+            this.properties = args.properties
         }
     }
 
     async _runtimeMessageHandler(msg:Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
-        const vals: Record<string, any> = evaluateSymbolProperty(this, msg)
+        const vals: { [propName: string]: PropertyObject} = this.evaluateSymbolProperties(this, msg)
         await this.onMessage(msg, vals, callback)
         
     }
     async onInit(_callback: OnMessageCallback): Promise<void> {
-        this.evaluatePropertyMetadata(this)
     }
 
-    private async onMessage(_msg: Record<string, any>, _vals: Record<string, any>, _callback: OnMessageCallback): Promise<OnMessageCallback> {
-        return new Promise(_callback)
+    private async onMessage(_msg: Record<string, any>, _vals: Record<string, any>, _callback: OnMessageCallback): Promise<void> {
     }
 
-    private evaluatePropertyMetadata(symbol: Symbol) : {[name:string]:TypedMetadata} | undefined  {
-        const evaluated:{[name:string]:TypedMetadata} | undefined = Symbol!["schema"]!["propertiesSchema"];
-        if(Symbol.schema && Symbol.schema.propertiesSchema){
-            Object.entries(symbol.properties).forEach(([property, propVal]) => {
-                try{ 
-                    const type: PrimitiveTypes = propVal.type;
-                    if(!(propVal instanceof TypedInput)){
-                        switch (type) {
-                            case "str":
-                            case "bool":
-                            case "num": 
-                            case "json": {
-                                const propertySchemaInner: TypedMetadata = {
-                                    label: property,
-                                    component: "input"
-                                }
-                                evaluated![property] = propertySchemaInner
-                                break;
-                            }
-                            default: {
-                                console.log("No match");
-                                return undefined
-                            }
-                        }
-                    } else {
-                        switch (type) {
-                            case "str":
-                            case "bool":
-                            case "num": 
-                            case "json":
-                            case "msg":
-                            case "global":{
-                                evaluated![property].component = "input";
-                                evaluated![property].label = propVal?.label || property;
-                                evaluated![property].options = propVal?.options || {};
-                                evaluated![property]!["options"]!["allowInput"] = propVal?.options?.allowInput ? propVal?.options?.allowInput : true;
-                                evaluated![property]!["options"]!["allowedTypes"] = propVal?.options?.allowedTypes ? propVal?.options?.allowedTypes: ["msg", "global", "str"];
-                                evaluated![property]!["options"]!["defaultValues"] = propVal?.options?.defaultValues ? propVal?.options?.defaultValues : "";
-                                evaluated![property]!["options"]!["placeholder"] = propVal?.options?.placeholder ? propVal?.options?.placeholder: "";
-                                evaluated![property]!["options"]!["width"] = propVal?.options?.width ? propVal?.options?.width : "40px";
-                                break;
-                            }
-                            default: {
-                                console.log("No match");
-                                return undefined
-                            }
-                        }
+    private generateDslSchema(symbol: Symbol) : {[name:string]:TypedMetadata} {
+        const evaluated:{[name:string]:TypedMetadata} | undefined = {}
+        Object.entries(Symbol.schema.propertiesSchema).forEach(([property, propVal]) => {
+            try{ 
+                const field: Property = {[property]: propVal};
+                if((field[property] instanceof TypedInput)){
+                    evaluated[property] = (propVal as TypedInput).generateSchema(property, propVal as TypedInput)
+                } else{
+                    evaluated[property] = {
+                        component: "input",
+                        label: property
                     }
-                } catch (error) {
-                    console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
-                    throw error
                 }
-            });
-        }
+            } catch (error) {
+                console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
+                throw error
+            }
+        });
+        return evaluated;
+    }
+
+    private evaluateSymbolProperties(symbol: Symbol, msg: Record<string, unknown>) {
+        const evaluated: { [propName: string]: PropertyObject} = {}
+        Object.entries(Symbol.schema.propertiesSchema).forEach(([property, propVal]) => {
+            try{ 
+                const field: Property = {[property]: propVal};
+                if((field[property] instanceof TypedInput)){
+                    evaluated[property] = (propVal as TypedInput).evaluateField(symbol, msg)
+                } else{
+                    evaluated[property] = {
+                        value: propVal.value,
+                        type: propVal.type
+                    }
+                }
+            } catch (error) {
+                console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
+                throw error
+            }
+        })
         return evaluated;
     }
 
     toJSON(): string {
-        const out: SymbolType = {
-            id: generateId(),
+        const out: SymbolDsl = {
+            id: this.id,
             type: Symbol.type,
-            category: Symbol.category,
             isConfig: Symbol.isConfig,
-            editorLabel: this.editorLabel,
-            paletteLabel: Symbol.paletteLabel,
             description: Symbol.description,
             properties: this.properties,
-            schema: Symbol.schema,
+            schema: {
+                editorProperties: Symbol.schema.editorProperties,
+                inputSchema: Symbol.schema.inputSchema,
+                outputSchema: Symbol.schema.outputSchema,
+                propertiesSchema: this.generateDslSchema(this)
+            },
             children: this.children,
             metadata: this.metadata,
             wires: this.wires
@@ -161,9 +156,9 @@ class Symbol implements SymbolImpl {
     }
 
     static fromJSON(symbolRepr: string, callback?: OnMessageCallback): Symbol {
-        function dummy(){}
+        const dummy = {}
         try {
-            const parsed: SymbolType = JSON.parse(symbolRepr)
+            const parsed: SymbolDsl = JSON.parse(symbolRepr)
             const sym: Symbol = new Symbol(callback ? callback : dummy, parsed)
             return sym
         } catch (error) {

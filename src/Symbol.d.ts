@@ -4,17 +4,25 @@ export interface OnMessageCallback { (done: unknown): void}
 
 export type GenericArray<T=unknown> = Array<T>
 
-export type PrimitiveTypes = 'str' | 'num' | 'bool' | 'json' | 'date' | 'msg' | 'global' | 're' | 'jsonata' | 'password' | 'bin' | 'select' | 'checkbox' | 'radio' | 'config';
+export type ValueType  = string | number | boolean | Array<unknown> | Record<string, unknown> | TypedInput;
+type PropertyObject = {
+    value: ValueType;
+    type: PrimitiveTypes | TypedInputTypes;
+}
+export type FieldType = PropertyObject | TypedInput
 
-export type ComponentTypes = 'input' | 'select' | 'checkbox' | 'radio' | 'toggle' | 'editable-table';
+export type PrimitiveTypes = 'str' | 'num' | 'bool';
 
-export type ListPrimitiveTypes = Array<PrimitiveTypes>
+export type TypedInputTypes = 'str' | 'num' | 'bool' | 'json' | 'date' | 'msg' | 'global' | 're' | 'jsonata' | 'password' | 'bin' | 'config';
+
+export type ComponentTypes = 'input' | 'select' | 'checkbox' | 'radio' | 'toggle' | 'editable-table' | 'select-config' | 'input-json';
+
+export type ListInputTypes = Array<TypedInputTypes>
 export type TypedInputArgs = {
-    type: PrimitiveTypes;
-    value: string | string[] | TypedInput;
-    allowedTypes?: ListPrimitiveTypes;
+    value?: ValueType,
+    type: TypedInputTypes;
+    allowedTypes?: ListInputTypes;
     defaultValue?: string | TypedInput;
-    options?: TypedInputOptions;
     label?: string;
     width?: string;
     placeholder?: string;
@@ -22,8 +30,8 @@ export type TypedInputArgs = {
 }
 
 export type TypedInputOptions = {
-    allowedTypes?: ListPrimitiveTypes;
-    defaultValues?: string | TypedInput;
+    allowedTypes?: ListInputTypes;
+    defaultValue?: unknown;
     width?: string;
     placeholder?: string;
     allowInput?: boolean
@@ -34,11 +42,8 @@ export type TypedMetadata = {
     label?: string;
     options?: TypedInputOptions
 }
-export interface Properties {
-    [name: string]: {
-        value: string,
-        type: PrimitiveTypes
-    } | TypedInput
+export interface Property {
+    [fieldName: string]: FieldType
 }
 
 export type Wires = Array<Array<string>> | [[]];
@@ -77,30 +82,69 @@ interface Schema {
             description: string;
         };
     }
-    propertiesSchema?: {
-        [name:string]: TypedMetadata
+    propertiesSchema: Property,
+    editorProperties: {
+        icon: string;
+        color: string;
+        paletteLabel: string;
+        category: string;
     }
 }
 
 export interface SymbolImpl {
-    editorLabel?: string;
-    properties: Properties;
+    id?: string;
+    label?: string;
     children?: Children;
     metadata?: Metadata;
     wires: Wires;
 }
 
 type SymbolStatic = {
-    id: string;
     type: string;
-    paletteLabel: string;
     description: string;
     isConfig: boolean;
-    category: string;
-    properties: Properties;
+    properties: {
+        [fieldName: string]: PropertyObject
+    };
     children?: Children;
     metadata?: Metadata;
-    schema?: Schema;
+    schema: Schema;
 }
 
-export interface SymbolType extends SymbolImpl, SymbolStatic {}
+export interface SymbolDsl {
+    id: string;
+    type: string;
+    description: string;
+    isConfig: boolean;
+    properties: {
+        [fieldName: string]: PropertyObject
+    };
+    children?: Children;
+    metadata?: Metadata;
+    schema: {
+        inputSchema?: {
+            [name:string]: {
+                type: unknown;
+                description: string;
+            };
+        }
+        outputSchema?: {
+            [name:string]: {
+                type: unknown;
+                description: string;
+            };
+        }
+        propertiesSchema: {
+            [name: string]: TypedMetadata
+        }
+        editorProperties: {
+            icon: string;
+            color: string;
+            paletteLabel: string;
+            category: string;
+        }
+    };
+    wires: Wires
+}
+
+export interface SymbolType extends SymbolStatic, SymbolImpl {}
